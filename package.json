@@ -1,0 +1,35 @@
+{
+  "name": "web-game-experiments",
+  "version": "0.0.1",
+  "description": "My sandbox for experimentally applying web technologies to games development",
+  "private": true,
+  "scripts": {
+    "build": "webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jamesseanwright/web-game-experiments.git"
+  },
+  "keywords": [
+    "games",
+    "dev",
+    "web",
+    "canvas",
+    "javascript",
+    "typescript",
+    "webgl"
+  ],
+  "author": "James Wright <hi@james.engineering>",
+  "license": "GPL-3.0-only",
+  "bugs": {
+    "url": "https://github.com/jamesseanwright/web-game-experiments/issues"
+  },
+  "homepage": "https://github.com/jamesseanwright/web-game-experiments#readme",
+  "devDependencies": {
+    "ts-loader": "9.4.2",
+    "typescript": "5.0.4",
+    "webpack": "5.79.0",
+    "webpack-cli": "5.0.1"
+  }
+}
