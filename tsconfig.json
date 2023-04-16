@@ -3,6 +3,6 @@
     "module": "CommonJS",
     "strict": true,
     "target": "ES2022",
-    "moduleResolution": "node",
+    "moduleResolution": "node"
   }
 }
