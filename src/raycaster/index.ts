@@ -1,11 +1,11 @@
 const createKeys = () => {
-  const keys = new Set<string>;
+  const keys = new Set<string>();
 
-  window.addEventListener('keydown', ({ key }) => {
+  window.addEventListener("keydown", ({ key }) => {
     keys.add(key);
   });
 
-  window.addEventListener('keyup', ({ key }) => {
+  window.addEventListener("keyup", ({ key }) => {
     keys.delete(key);
   });
 
@@ -25,7 +25,7 @@ if (!context) {
 }
 
 interface Entity {
-  update(): void
+  update(): void;
 }
 
 const GRID_ITEM_SIZE = 64;
@@ -45,40 +45,68 @@ const createMapRenderer = () => ({
   update() {
     for (let row = 0; row < map.length; row++) {
       for (let col = 0; col < map[row].length; col++) {
-        context.fillStyle = map[row][col] === 1 ? 'white' : 'black';
-        context.fillRect(GRID_ITEM_SIZE * col, GRID_ITEM_SIZE * row, GRID_ITEM_SIZE, GRID_ITEM_SIZE);
+        context.fillStyle = map[row][col] === 1 ? "white" : "black";
+        context.fillRect(
+          GRID_ITEM_SIZE * col,
+          GRID_ITEM_SIZE * row,
+          GRID_ITEM_SIZE,
+          GRID_ITEM_SIZE,
+        );
       }
     }
-  }
+  },
 });
 
 const PLAYER_SIZE = 32;
+const PLAYER_SPEED = 5;
+const PLAYER_ROTATION_SPEED = 0.1;
 
 const isKeyPressed = createKeys();
 
-const createPlayer = (x: number, y: number, speed: number) => ({
+const createPlayer = (x: number, y: number, rotation: number) => ({
   x,
   y,
-  speed,
+  rotation,
+  deltaX: Math.cos(rotation) * 5,
+  deltaY: Math.sin(rotation) * 5,
   update() {
-    if (isKeyPressed('w')) {
-      this.y -= speed;
+    if (isKeyPressed("w")) {
+      this.x += this.deltaX;
+      this.y += this.deltaY;
     }
 
-    if (isKeyPressed('s')) {
-      this.y += speed;
+    if (isKeyPressed("s")) {
+      this.x -= this.deltaX;
+      this.y -= this.deltaY;
     }
 
-    if (isKeyPressed('a')) {
-      this.x -= speed;
+    if (isKeyPressed("a")) {
+      const rotation = this.rotation - PLAYER_ROTATION_SPEED;
+      this.rotation = rotation < 0 ? rotation + Math.PI * 2 : rotation;
+      this.deltaX = Math.cos(this.rotation) * 5;
+      this.deltaY = Math.sin(this.rotation) * 5;
     }
 
-    if (isKeyPressed('d')) {
-      this.x += speed;
+    if (isKeyPressed("d")) {
+      const rotation = this.rotation + PLAYER_ROTATION_SPEED;
+      this.rotation =
+        rotation > Math.PI * 2 ? rotation - 2 * Math.PI : rotation;
+      this.deltaX = Math.cos(this.rotation) * 5;
+      this.deltaY = Math.sin(this.rotation) * 5;
     }
 
-    context.fillStyle = 'green';
+    context.fillStyle = "green";
     context.fillRect(this.x, this.y, PLAYER_SIZE, PLAYER_SIZE);
+
+    context.lineWidth = PLAYER_SIZE / 4;
+    context.strokeStyle = "green";
+    context.beginPath();
+    context.moveTo(this.x + PLAYER_SIZE / 2, this.y + PLAYER_SIZE / 2);
+    context.lineTo(
+      this.x + PLAYER_SIZE / 2 + this.deltaX * 10,
+      this.y + PLAYER_SIZE / 2 + this.deltaY * 10,
+    );
+    context.stroke();
   },
 });
 
@@ -87,7 +115,7 @@ const TICK_INTERVAL_MS = 1000 / FPS;
 
 let lastTick = 0;
 
-const entities: Entity[] = [createMapRenderer(), createPlayer(300, 300, 5)];
+const entities: Entity[] = [createMapRenderer(), createPlayer(300, 300, 0)];
 
 const loop = (tick: DOMHighResTimeStamp) => {
   if (tick - lastTick >= TICK_INTERVAL_MS) {
