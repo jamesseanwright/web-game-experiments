@@ -28,6 +28,15 @@ interface Entity {
   update(): void;
 }
 
+interface Rotatable {
+  rotation: number;
+}
+
+interface Positionable {
+  x: number;
+  y: number;
+}
+
 const GRID_ITEM_SIZE = 64;
 
 const map = [
@@ -53,6 +62,111 @@ const createMapRenderer = () => ({
           GRID_ITEM_SIZE,
         );
       }
+    }
+  },
+});
+
+const RAY_COUNT = 1;
+
+const createRayRenderer = (raySource: Positionable & Rotatable) => ({
+  drawHorizontalRay() {
+    const rotation = raySource.rotation;
+    const atan = -1 / Math.tan(rotation);
+    let x = -1;
+    let y = -1;
+    let xOffset = 0;
+    let yOffset = 0;
+
+    if (rotation > Math.PI) {
+      y = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE);
+      x = (raySource.y - y) * atan + raySource.x;
+      yOffset = -GRID_ITEM_SIZE;
+      xOffset = -yOffset * atan
+    }
+
+    if (rotation < Math.PI) {
+      y = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE) + GRID_ITEM_SIZE;
+      x = (raySource.y - y) * atan + raySource.x;
+      yOffset = GRID_ITEM_SIZE;
+      xOffset = -yOffset * atan
+    }
+
+    if (rotation !== 0 && rotation !== Math.PI) {
+      let j = 0;
+
+      while (j < 8) {
+        const row = Math.floor(y / GRID_ITEM_SIZE);
+        const col = Math.floor(x / GRID_ITEM_SIZE);
+
+        if (map[row]?.[col] === 1) {
+          break;
+        }
+
+        x += xOffset;
+        y += yOffset;
+        j++;
+      }
+    }
+
+    context.strokeStyle = 'green';
+    context.lineWidth = 1;
+    context.beginPath();
+    context.moveTo(raySource.x, raySource.y);
+    context.lineTo(x, y);
+    context.stroke();
+  },
+
+  drawVerticalRay() {
+    const rotation = raySource.rotation;
+    const ntan = -Math.tan(rotation);
+    let x = -1;
+    let y = -1;
+    let xOffset = 0;
+    let yOffset = 0;
+
+    if (rotation > Math.PI / 2 && rotation < Math.PI / 2 * 3) {
+      x = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE);
+      y = (raySource.y - y) * ntan + raySource.y;
+      xOffset = -GRID_ITEM_SIZE;
+      yOffset = -xOffset * ntan
+    }
+
+    if (rotation < Math.PI / 2 || rotation > Math.PI / 2 * 3) {
+      x = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE) + GRID_ITEM_SIZE;
+      y = (raySource.y - y) * ntan + raySource.y;
+      xOffset = GRID_ITEM_SIZE;
+      yOffset = -xOffset * ntan
+    }
+
+    if (rotation !== 0 && rotation !== Math.PI) {
+      let j = 0;
+
+      while (j < 8) {
+        const row = Math.floor(y / GRID_ITEM_SIZE);
+        const col = Math.floor(x / GRID_ITEM_SIZE);
+
+        if (map[row]?.[col] === 1) {
+          break;
+        }
+
+        x += xOffset;
+        y += yOffset;
+        j++;
+      }
+    }
+
+    context.strokeStyle = 'green';
+    context.lineWidth = 1;
+    context.beginPath();
+    context.moveTo(raySource.x, raySource.y);
+    context.lineTo(x, y);
+    context.stroke();
+  },
+
+  update() {
+    for (let i = 0; i < RAY_COUNT; i++) {
+      this.drawHorizontalRay();
+      this.drawVerticalRay();
     }
   },
 });
@@ -115,7 +229,8 @@ const TICK_INTERVAL_MS = 1000 / FPS;
 
 let lastTick = 0;
 
-const entities: Entity[] = [createMapRenderer(), createPlayer(300, 300, 0)];
+const player = createPlayer(300, 300, 0);
+const entities: Entity[] = [createMapRenderer(), player, createRayRenderer(player)];
 
 const loop = (tick: DOMHighResTimeStamp) => {
   if (tick - lastTick >= TICK_INTERVAL_MS) {
