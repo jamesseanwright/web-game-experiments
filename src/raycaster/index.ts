@@ -8,4 +8,19 @@ if (!context) {
   );
 }
 
-context.fillText("Hello", 5, 5);
+const FPS = 60;
+const TICK_INTERVAL_MS = 1000 / FPS;
+
+let lastTick = 0;
+
+const loop = (tick: DOMHighResTimeStamp) => {
+  if (tick - lastTick >= TICK_INTERVAL_MS) {
+    context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+    context.fillText(tick + "", 20, 20);
+    lastTick = tick;
+  }
+
+  requestAnimationFrame(loop);
+};
+
+requestAnimationFrame(loop);
