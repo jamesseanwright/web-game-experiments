@@ -69,7 +69,7 @@ const createMapRenderer = () => ({
 const RAY_COUNT = 1;
 
 const createRayRenderer = (raySource: Positionable & Rotatable) => ({
-  drawHorizontalRay() {
+  update() {
     const rotation = raySource.rotation;
     const atan = -1 / Math.tan(rotation);
     let x = -1;
@@ -78,14 +78,14 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
     let yOffset = 0;
 
     if (rotation > Math.PI) {
-      y = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE);
+      y = GRID_ITEM_SIZE * Math.round(raySource.y / GRID_ITEM_SIZE);
       x = (raySource.y - y) * atan + raySource.x;
       yOffset = -GRID_ITEM_SIZE;
       xOffset = -yOffset * atan
     }
 
     if (rotation < Math.PI) {
-      y = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE) + GRID_ITEM_SIZE;
+      y = GRID_ITEM_SIZE * Math.round(raySource.y / GRID_ITEM_SIZE) + GRID_ITEM_SIZE;
       x = (raySource.y - y) * atan + raySource.x;
       yOffset = GRID_ITEM_SIZE;
       xOffset = -yOffset * atan
@@ -95,7 +95,7 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
       let j = 0;
 
       while (j < 8) {
-        const row = Math.floor(y / GRID_ITEM_SIZE);
+        const row = y / GRID_ITEM_SIZE;
         const col = Math.floor(x / GRID_ITEM_SIZE);
 
         if (map[row]?.[col] === 1) {
@@ -114,60 +114,48 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
     context.moveTo(raySource.x, raySource.y);
     context.lineTo(x, y);
     context.stroke();
-  },
 
-  drawVerticalRay() {
-    const rotation = raySource.rotation;
-    const ntan = -Math.tan(rotation);
-    let x = -1;
-    let y = -1;
-    let xOffset = 0;
-    let yOffset = 0;
+    // const ntan = -Math.tan(rotation);
 
-    if (rotation > Math.PI / 2 && rotation < Math.PI / 2 * 3) {
-      x = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE);
-      y = (raySource.y - y) * ntan + raySource.y;
-      xOffset = -GRID_ITEM_SIZE;
-      yOffset = -xOffset * ntan
-    }
+    // if (rotation > Math.PI / 2 && rotation < Math.PI / 2 * 3) {
+    //   x = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE);
+    //   y = (raySource.x - x) * ntan + raySource.y;
+    //   xOffset = -GRID_ITEM_SIZE;
+    //   yOffset = -xOffset * ntan
+    // }
 
-    if (rotation < Math.PI / 2 || rotation > Math.PI / 2 * 3) {
-      x = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE) + GRID_ITEM_SIZE;
-      y = (raySource.y - y) * ntan + raySource.y;
-      xOffset = GRID_ITEM_SIZE;
-      yOffset = -xOffset * ntan
-    }
+    // if (rotation < Math.PI / 2 || rotation > Math.PI / 2 * 3) {
+    //   x = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE) + GRID_ITEM_SIZE;
+    //   y = (raySource.x - x) * ntan + raySource.y;
+    //   xOffset = GRID_ITEM_SIZE;
+    //   yOffset = -xOffset * ntan
+    // }
 
-    if (rotation !== 0 && rotation !== Math.PI) {
-      let j = 0;
+    // if (rotation !== 0 && rotation !== Math.PI) {
+    //   let j = 0;
 
-      while (j < 8) {
-        const row = Math.floor(y / GRID_ITEM_SIZE);
-        const col = Math.floor(x / GRID_ITEM_SIZE);
+    //   while (j < 8) {
+    //     const row = Math.floor(y / GRID_ITEM_SIZE);
+    //     const col = x / GRID_ITEM_SIZE;
 
-        if (map[row]?.[col] === 1) {
-          break;
-        }
+    //     console.log(x, y, row, col)
 
-        x += xOffset;
-        y += yOffset;
-        j++;
-      }
-    }
+    //     if (map[row]?.[col] === 1) {
+    //       break;
+    //     }
 
-    context.strokeStyle = 'green';
-    context.lineWidth = 1;
-    context.beginPath();
-    context.moveTo(raySource.x, raySource.y);
-    context.lineTo(x, y);
-    context.stroke();
-  },
+    //     x += xOffset;
+    //     y += yOffset;
+    //     j++;
+    //   }
+    // }
 
-  update() {
-    for (let i = 0; i < RAY_COUNT; i++) {
-      this.drawHorizontalRay();
-      this.drawVerticalRay();
-    }
+    // context.strokeStyle = 'pink';
+    // context.lineWidth = 1;
+    // context.beginPath();
+    // context.moveTo(raySource.x, raySource.y);
+    // context.lineTo(x, y);
+    // context.stroke();
   },
 });
 
