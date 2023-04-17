@@ -77,7 +77,7 @@ const createMapRenderer = () => ({
 const RAY_COUNT = 1;
 
 const createRayRenderer = (raySource: Positionable & Rotatable) => ({
-  // TODO: refactor to share common logic for horizontal and vertical tests
+  // TODO: refactor to share common logic between horizontal and vertical tests
   update() {
     const rotation = raySource.rotation;
 
