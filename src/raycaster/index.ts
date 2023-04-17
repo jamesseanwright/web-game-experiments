@@ -90,7 +90,7 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
     let xOffset = 0;
     let yOffset = 0;
 
-    // TODO: shift these conditions into constants
+    // TODO: shift these conditional expressions into descriptively-named constants
     if (rotation > Math.PI) {
       y = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE);
       x = (raySource.y - y) * atan + raySource.x;
