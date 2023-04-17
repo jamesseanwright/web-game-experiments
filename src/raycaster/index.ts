@@ -77,6 +77,7 @@ const createMapRenderer = () => ({
 const RAY_COUNT = 1;
 
 const createRayRenderer = (raySource: Positionable & Rotatable) => ({
+  // TODO: refactor to share common logic for horizontal and vertical tests
   update() {
     const rotation = raySource.rotation;
 
@@ -84,11 +85,12 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
     const atan = -1 / Math.tan(rotation);
     let x = -1;
     let y = -1;
-    let xDir = 1;
+    let xDir = 1; // TODO: improve/consolidate names
     let yDir = 1;
     let xOffset = 0;
     let yOffset = 0;
 
+    // TODO: shift these conditions into constants
     if (rotation > Math.PI) {
       y = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE);
       x = (raySource.y - y) * atan + raySource.x;
