@@ -95,7 +95,10 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
     }
 
     if (rotation < Math.PI) {
-      y = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE) + GRID_ITEM_SIZE;
+      y =
+        GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE) +
+        GRID_ITEM_SIZE;
+
       x = (raySource.y - y) * atan + raySource.x;
       yDir = 1;
       yOffset = 0;
@@ -106,8 +109,6 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
       let j = 0;
 
       while (j < 8) {
-        const playerRow = Math.floor(raySource.y / GRID_ITEM_SIZE)
-        const playerCol = Math.floor(raySource.x / GRID_ITEM_SIZE)
         const row = y / GRID_ITEM_SIZE;
         const col = Math.floor(x / GRID_ITEM_SIZE);
 
@@ -121,7 +122,7 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
       }
     }
 
-    context.strokeStyle = 'green';
+    context.strokeStyle = "green";
     context.lineWidth = 1;
     context.beginPath();
     context.moveTo(raySource.x, raySource.y);
@@ -231,7 +232,11 @@ const TICK_INTERVAL_MS = 1000 / FPS;
 let lastTick = 0;
 
 const player = createPlayer(300, 300, 0);
-const entities: Entity[] = [createMapRenderer(), player, createRayRenderer(player)];
+const entities: Entity[] = [
+  createMapRenderer(),
+  player,
+  createRayRenderer(player),
+];
 
 const loop = (tick: DOMHighResTimeStamp) => {
   if (tick - lastTick >= TICK_INTERVAL_MS) {
