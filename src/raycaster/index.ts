@@ -135,7 +135,7 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
     // Test vertical lines
     const ntan = -Math.tan(rotation);
 
-    if (rotation > Math.PI / 2 && rotation < Math.PI / 2 * 3) {
+    if (rotation > Math.PI / 2 && rotation < (Math.PI / 2) * 3) {
       x = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE);
       y = (raySource.x - x) * ntan + raySource.y;
       xDir = -1;
@@ -143,8 +143,10 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
       yOffset = -xDir * GRID_ITEM_SIZE * ntan;
     }
 
-    if (rotation < Math.PI / 2 || rotation > Math.PI / 2 * 3) {
-      x = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE) + GRID_ITEM_SIZE;
+    if (rotation < Math.PI / 2 || rotation > (Math.PI / 2) * 3) {
+      x =
+        GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE) +
+        GRID_ITEM_SIZE;
       y = (raySource.x - x) * ntan + raySource.y;
       xDir = 1;
       xOffset = 0;
@@ -168,7 +170,7 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
       }
     }
 
-    context.strokeStyle = 'pink';
+    context.strokeStyle = "pink";
     context.lineWidth = 1;
     context.beginPath();
     context.moveTo(raySource.x, raySource.y);
