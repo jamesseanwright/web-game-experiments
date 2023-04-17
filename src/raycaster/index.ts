@@ -61,6 +61,14 @@ const createMapRenderer = () => ({
           GRID_ITEM_SIZE,
           GRID_ITEM_SIZE,
         );
+
+        context.strokeStyle = "2px solid blue";
+        context.strokeRect(
+          GRID_ITEM_SIZE * col,
+          GRID_ITEM_SIZE * row,
+          GRID_ITEM_SIZE,
+          GRID_ITEM_SIZE,
+        );
       }
     }
   },
@@ -74,27 +82,32 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
     const atan = -1 / Math.tan(rotation);
     let x = -1;
     let y = -1;
+    let yDir = 1;
     let xOffset = 0;
     let yOffset = 0;
 
     if (rotation > Math.PI) {
-      y = GRID_ITEM_SIZE * Math.round(raySource.y / GRID_ITEM_SIZE);
+      y = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE);
       x = (raySource.y - y) * atan + raySource.x;
-      yOffset = -GRID_ITEM_SIZE;
-      xOffset = -yOffset * atan
+      yDir = -1;
+      yOffset = GRID_ITEM_SIZE;
+      xOffset = -yDir * GRID_ITEM_SIZE * atan;
     }
 
     if (rotation < Math.PI) {
-      y = GRID_ITEM_SIZE * Math.round(raySource.y / GRID_ITEM_SIZE) + GRID_ITEM_SIZE;
+      y = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE) + GRID_ITEM_SIZE;
       x = (raySource.y - y) * atan + raySource.x;
-      yOffset = GRID_ITEM_SIZE;
-      xOffset = -yOffset * atan
+      yDir = 1;
+      yOffset = 0;
+      xOffset = -yDir * GRID_ITEM_SIZE * atan;
     }
 
     if (rotation !== 0 && rotation !== Math.PI) {
       let j = 0;
 
       while (j < 8) {
+        const playerRow = Math.floor(raySource.y / GRID_ITEM_SIZE)
+        const playerCol = Math.floor(raySource.x / GRID_ITEM_SIZE)
         const row = y / GRID_ITEM_SIZE;
         const col = Math.floor(x / GRID_ITEM_SIZE);
 
@@ -103,7 +116,7 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
         }
 
         x += xOffset;
-        y += yOffset;
+        y += GRID_ITEM_SIZE * yDir;
         j++;
       }
     }
@@ -112,7 +125,7 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
     context.lineWidth = 1;
     context.beginPath();
     context.moveTo(raySource.x, raySource.y);
-    context.lineTo(x, y);
+    context.lineTo(x, y + yOffset);
     context.stroke();
 
     // const ntan = -Math.tan(rotation);
