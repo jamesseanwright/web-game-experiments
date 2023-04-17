@@ -79,9 +79,12 @@ const RAY_COUNT = 1;
 const createRayRenderer = (raySource: Positionable & Rotatable) => ({
   update() {
     const rotation = raySource.rotation;
+
+    // Test horizontal lines
     const atan = -1 / Math.tan(rotation);
     let x = -1;
     let y = -1;
+    let xDir = 1;
     let yDir = 1;
     let xOffset = 0;
     let yOffset = 0;
@@ -129,47 +132,48 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
     context.lineTo(x, y + yOffset);
     context.stroke();
 
-    // const ntan = -Math.tan(rotation);
+    // Test vertical lines
+    const ntan = -Math.tan(rotation);
 
-    // if (rotation > Math.PI / 2 && rotation < Math.PI / 2 * 3) {
-    //   x = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE);
-    //   y = (raySource.x - x) * ntan + raySource.y;
-    //   xOffset = -GRID_ITEM_SIZE;
-    //   yOffset = -xOffset * ntan
-    // }
+    if (rotation > Math.PI / 2 && rotation < Math.PI / 2 * 3) {
+      x = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE);
+      y = (raySource.x - x) * ntan + raySource.y;
+      xDir = -1;
+      xOffset = GRID_ITEM_SIZE;
+      yOffset = -xDir * GRID_ITEM_SIZE * ntan;
+    }
 
-    // if (rotation < Math.PI / 2 || rotation > Math.PI / 2 * 3) {
-    //   x = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE) + GRID_ITEM_SIZE;
-    //   y = (raySource.x - x) * ntan + raySource.y;
-    //   xOffset = GRID_ITEM_SIZE;
-    //   yOffset = -xOffset * ntan
-    // }
+    if (rotation < Math.PI / 2 || rotation > Math.PI / 2 * 3) {
+      x = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE) + GRID_ITEM_SIZE;
+      y = (raySource.x - x) * ntan + raySource.y;
+      xDir = 1;
+      xOffset = 0;
+      yOffset = -xDir * GRID_ITEM_SIZE * ntan;
+    }
 
-    // if (rotation !== 0 && rotation !== Math.PI) {
-    //   let j = 0;
+    if (rotation !== 0 && rotation !== Math.PI) {
+      let j = 0;
 
-    //   while (j < 8) {
-    //     const row = Math.floor(y / GRID_ITEM_SIZE);
-    //     const col = x / GRID_ITEM_SIZE;
+      while (j < 8) {
+        const row = Math.floor(y / GRID_ITEM_SIZE);
+        const col = x / GRID_ITEM_SIZE;
 
-    //     console.log(x, y, row, col)
+        if (map[row]?.[col] === 1) {
+          break;
+        }
 
-    //     if (map[row]?.[col] === 1) {
-    //       break;
-    //     }
+        x += GRID_ITEM_SIZE * xDir;
+        y += yOffset;
+        j++;
+      }
+    }
 
-    //     x += xOffset;
-    //     y += yOffset;
-    //     j++;
-    //   }
-    // }
-
-    // context.strokeStyle = 'pink';
-    // context.lineWidth = 1;
-    // context.beginPath();
-    // context.moveTo(raySource.x, raySource.y);
-    // context.lineTo(x, y);
-    // context.stroke();
+    context.strokeStyle = 'pink';
+    context.lineWidth = 1;
+    context.beginPath();
+    context.moveTo(raySource.x, raySource.y);
+    context.lineTo(x + xOffset, y);
+    context.stroke();
   },
 });
 
