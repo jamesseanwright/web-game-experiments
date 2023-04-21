@@ -116,71 +116,51 @@ const drawRays = (
   context.stroke();
 };
 
+const testHorizontalIntersect = (raySource: Positionable & Rotatable) => {
+  const ncotan = -1 / Math.tan(raySource.rotation);
+  let y = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE);
+  let yOffset = GRID_ITEM_SIZE; // This is so the line ends at the bottom of the tile
+  let yTileStep = -GRID_ITEM_SIZE;
+  const x = (raySource.y - y) * ncotan + raySource.x;
+
+  const isFacingSouth = raySource.rotation < Math.PI;
+
+  if (isFacingSouth) {
+    y += GRID_ITEM_SIZE;
+    yTileStep = GRID_ITEM_SIZE;
+    yOffset = 0; // We want the ray line to end at the top of the tile here
+  }
+
+  const xTileStep = -yTileStep * ncotan;
+
+  drawRays(raySource, x, y, xTileStep, yTileStep, 0, yOffset);
+};
+
+const testVerticalIntersect = (raySource: Positionable & Rotatable) => {
+  const ntan = -Math.tan(raySource.rotation);
+  let x = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE);
+  let xTileStep = -GRID_ITEM_SIZE;
+  let xOffset = GRID_ITEM_SIZE; // This is so the line ends at the right of the tile
+  const y = (raySource.x - x) * ntan + raySource.y;
+
+  const isFacingEast =
+    raySource.rotation < Math.PI / 2 || raySource.rotation > (Math.PI / 2) * 3;
+
+  if (isFacingEast) {
+    x += GRID_ITEM_SIZE;
+    xTileStep = GRID_ITEM_SIZE;
+    xOffset = 0; // We want the line to end at the left of the tile here
+  }
+
+  const yTileStep = -xTileStep * ntan;
+
+  drawRays(raySource, x, y, xTileStep, yTileStep, xOffset, 0);
+};
+
 const createRayRenderer = (raySource: Positionable & Rotatable) => ({
   update() {
-    const rotation = raySource.rotation;
-
-    // Test horizontal intersects
-    const ncotan = -1 / Math.tan(rotation);
-    let x = -1;
-    let y = -1;
-    let xOffset = 0;
-    let yOffset = 0;
-    let xTileStep = 0;
-    let yTileStep = 0;
-
-    const isFacingNorth = rotation > Math.PI;
-    const isFacingSouth = rotation < Math.PI;
-
-    if (isFacingNorth) {
-      y = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE);
-      x = (raySource.y - y) * ncotan + raySource.x;
-      yTileStep = -GRID_ITEM_SIZE;
-      yOffset = GRID_ITEM_SIZE; // This is so the line ends at the bottom of the tile
-    }
-
-    if (isFacingSouth) {
-      y =
-        GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE) +
-        GRID_ITEM_SIZE;
-
-      x = (raySource.y - y) * ncotan + raySource.x;
-      yTileStep = GRID_ITEM_SIZE;
-    }
-
-    xTileStep = -yTileStep * ncotan;
-
-    drawRays(raySource, x, y, xTileStep, yTileStep, xOffset, yOffset);
-
-    // Test vertical intersects
-    xOffset = 0;
-    yOffset = 0;
-    xTileStep = 0;
-    yTileStep = 0;
-
-    const ntan = -Math.tan(rotation);
-    const isFacingWest = rotation > Math.PI / 2 && rotation < (Math.PI / 2) * 3;
-    const isFacingEast = rotation < Math.PI / 2 || rotation > (Math.PI / 2) * 3;
-
-    if (isFacingWest) {
-      x = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE);
-      y = (raySource.x - x) * ntan + raySource.y;
-      xTileStep = -GRID_ITEM_SIZE;
-      xOffset = GRID_ITEM_SIZE; // This is so the line ends at the right of the tile
-    }
-
-    if (isFacingEast) {
-      x =
-        GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE) +
-        GRID_ITEM_SIZE;
-
-      y = (raySource.x - x) * ntan + raySource.y;
-      xTileStep = GRID_ITEM_SIZE;
-    }
-
-    yTileStep = -xTileStep * ntan;
-
-    drawRays(raySource, x, y, xTileStep, yTileStep, xOffset, yOffset);
+    testHorizontalIntersect(raySource);
+    testVerticalIntersect(raySource);
   },
 });
 
