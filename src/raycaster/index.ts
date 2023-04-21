@@ -90,8 +90,11 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
     let xOffset = 0;
     let yOffset = 0;
 
-    // TODO: shift these conditional expressions into descriptively-named constants
-    if (rotation > Math.PI) {
+    const isFacingNorth = rotation > Math.PI;
+    const isFacingSouth = rotation < Math.PI;
+    const isFacingAlongAxis = rotation === 0 || rotation === Math.PI;
+
+    if (isFacingNorth) {
       y = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE);
       x = (raySource.y - y) * atan + raySource.x;
       yDir = -1;
@@ -99,7 +102,7 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
       xOffset = -yDir * GRID_ITEM_SIZE * atan;
     }
 
-    if (rotation < Math.PI) {
+    if (isFacingSouth) {
       y =
         GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE) +
         GRID_ITEM_SIZE;
@@ -110,7 +113,7 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
       xOffset = -yDir * GRID_ITEM_SIZE * atan;
     }
 
-    if (rotation !== 0 && rotation !== Math.PI) {
+    if (!isFacingAlongAxis) {
       let j = 0;
 
       while (j < 8) {
@@ -127,17 +130,19 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
       }
     }
 
-    context.strokeStyle = "green";
-    context.lineWidth = 1;
-    context.beginPath();
-    context.moveTo(raySource.x, raySource.y);
-    context.lineTo(x, y + yOffset);
-    context.stroke();
+    // context.strokeStyle = "green";
+    // context.lineWidth = 1;
+    // context.beginPath();
+    // context.moveTo(raySource.x, raySource.y);
+    // context.lineTo(x, y + yOffset);
+    // context.stroke();
 
     // Test vertical lines
     const ntan = -Math.tan(rotation);
+    const isFacingWest = rotation > Math.PI / 2 && rotation < (Math.PI / 2) * 3;
+    const isFacingEast = rotation < Math.PI / 2 || rotation > (Math.PI / 2) * 3;
 
-    if (rotation > Math.PI / 2 && rotation < (Math.PI / 2) * 3) {
+    if (isFacingWest) {
       x = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE);
       y = (raySource.x - x) * ntan + raySource.y;
       xDir = -1;
@@ -145,7 +150,7 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
       yOffset = -xDir * GRID_ITEM_SIZE * ntan;
     }
 
-    if (rotation < Math.PI / 2 || rotation > (Math.PI / 2) * 3) {
+    if (isFacingEast) {
       x =
         GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE) +
         GRID_ITEM_SIZE;
