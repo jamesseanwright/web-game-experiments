@@ -82,7 +82,7 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
     const rotation = raySource.rotation;
 
     // Test horizontal lines
-    const atan = -1 / Math.tan(rotation);
+    const cotan = 1 / Math.tan(rotation);
     let x = -1;
     let y = -1;
     let xOffset = 0;
@@ -96,7 +96,7 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
 
     if (isFacingNorth) {
       y = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE);
-      x = (raySource.y - y) * atan + raySource.x;
+      x = (raySource.y - y) * cotan + raySource.x;
       yTileStep = -GRID_ITEM_SIZE;
       yOffset = GRID_ITEM_SIZE; // This is so the line ends at the bottom of the tile
     }
@@ -106,11 +106,11 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
         GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE) +
         GRID_ITEM_SIZE;
 
-      x = (raySource.y - y) * atan + raySource.x;
+      x = (raySource.y - y) * cotan + raySource.x;
       yTileStep = GRID_ITEM_SIZE;
     }
 
-    xTileStep = -yTileStep * atan;
+    xTileStep = -yTileStep * cotan;
 
     if (!isFacingAlongAxis) {
       let j = 0;
