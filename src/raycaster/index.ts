@@ -1,3 +1,11 @@
+const GRID_ITEM_SIZE = 64;
+const RAY_COUNT = 1;
+const PLAYER_SIZE = 32;
+const PLAYER_SPEED = 5;
+const PLAYER_ROTATION_SPEED = 0.1;
+const FPS = 60;
+const TICK_INTERVAL_MS = 1000 / FPS;
+
 const createKeys = () => {
   const keys = new Set<string>();
 
@@ -35,8 +43,6 @@ interface Positionable {
   y: number;
 }
 
-const GRID_ITEM_SIZE = 64;
-
 const map = [
   [1, 1, 1, 1, 1, 1, 1, 1],
   [1, 0, 1, 0, 0, 0, 0, 1],
@@ -69,8 +75,6 @@ const renderMap = () => {
     }
   }
 };
-
-const RAY_COUNT = 1;
 
 const drawRays = (
   raySource: Rotatable & Positionable,
@@ -158,10 +162,6 @@ const renderRays = (raySource: Positionable & Rotatable) => {
   testVerticalIntersect(raySource);
 };
 
-const PLAYER_SIZE = 32;
-const PLAYER_SPEED = 5;
-const PLAYER_ROTATION_SPEED = 0.1;
-
 const isKeyPressed = createKeys();
 
 const createPlayer = (x: number, y: number, rotation: number) => ({
@@ -214,9 +214,6 @@ const renderPlayer = (player: Positionable & Rotatable) => {
 
   context.stroke();
 };
-
-const FPS = 60;
-const TICK_INTERVAL_MS = 1000 / FPS;
 
 let lastTick = 0;
 
