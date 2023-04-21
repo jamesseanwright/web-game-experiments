@@ -76,13 +76,52 @@ const createMapRenderer = () => ({
 
 const RAY_COUNT = 1;
 
+const drawRays = (
+  raySource: Rotatable & Positionable,
+  x: number,
+  y: number,
+  xTileStep: number,
+  yTileStep: number,
+  xOffset: number,
+  yOffset: number,
+) => {
+  const isFacingAlongAxis =
+    raySource.rotation === 0 || raySource.rotation === Math.PI;
+
+  if (isFacingAlongAxis) {
+    return;
+  }
+
+  let j = 0;
+
+  while (j < 8) {
+    // TODO: refactor depth of field check (and bump number!)
+    const row = Math.floor(y / GRID_ITEM_SIZE);
+    const col = Math.floor(x / GRID_ITEM_SIZE);
+
+    if (map[row]?.[col] === 1) {
+      break;
+    }
+
+    x += xTileStep;
+    y += yTileStep;
+    j++;
+  }
+
+  context.strokeStyle = "green";
+  context.lineWidth = 1;
+  context.beginPath();
+  context.moveTo(raySource.x, raySource.y);
+  context.lineTo(x + xOffset, y + yOffset);
+  context.stroke();
+};
+
 const createRayRenderer = (raySource: Positionable & Rotatable) => ({
-  // TODO: refactor to share common logic between horizontal and vertical tests
   update() {
     const rotation = raySource.rotation;
 
-    // Test horizontal lines
-    const cotan = 1 / Math.tan(rotation);
+    // Test horizontal intersects
+    const ncotan = -1 / Math.tan(rotation);
     let x = -1;
     let y = -1;
     let xOffset = 0;
@@ -92,11 +131,10 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
 
     const isFacingNorth = rotation > Math.PI;
     const isFacingSouth = rotation < Math.PI;
-    const isFacingAlongAxis = rotation === 0 || rotation === Math.PI;
 
     if (isFacingNorth) {
       y = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE);
-      x = (raySource.y - y) * cotan + raySource.x;
+      x = (raySource.y - y) * ncotan + raySource.x;
       yTileStep = -GRID_ITEM_SIZE;
       yOffset = GRID_ITEM_SIZE; // This is so the line ends at the bottom of the tile
     }
@@ -106,38 +144,20 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
         GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE) +
         GRID_ITEM_SIZE;
 
-      x = (raySource.y - y) * cotan + raySource.x;
+      x = (raySource.y - y) * ncotan + raySource.x;
       yTileStep = GRID_ITEM_SIZE;
     }
 
-    xTileStep = -yTileStep * cotan;
+    xTileStep = -yTileStep * ncotan;
 
-    if (!isFacingAlongAxis) {
-      let j = 0;
+    drawRays(raySource, x, y, xTileStep, yTileStep, xOffset, yOffset);
 
-      while (j < 8) {
-        // TODO: refactor depth of field check (and bump number!)
-        const row = y / GRID_ITEM_SIZE;
-        const col = Math.floor(x / GRID_ITEM_SIZE);
+    // Test vertical intersects
+    xOffset = 0;
+    yOffset = 0;
+    xTileStep = 0;
+    yTileStep = 0;
 
-        if (map[row]?.[col] === 1) {
-          break;
-        }
-
-        x += xTileStep;
-        y += yTileStep;
-        j++;
-      }
-    }
-
-    context.strokeStyle = "green";
-    context.lineWidth = 1;
-    context.beginPath();
-    context.moveTo(raySource.x, raySource.y);
-    context.lineTo(x, y + yOffset);
-    context.stroke();
-
-    // Test vertical lines
     const ntan = -Math.tan(rotation);
     const isFacingWest = rotation > Math.PI / 2 && rotation < (Math.PI / 2) * 3;
     const isFacingEast = rotation < Math.PI / 2 || rotation > (Math.PI / 2) * 3;
@@ -160,29 +180,7 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
 
     yTileStep = -xTileStep * ntan;
 
-    if (!isFacingAlongAxis) {
-      let j = 0;
-
-      while (j < 8) {
-        const row = Math.floor(y / GRID_ITEM_SIZE);
-        const col = x / GRID_ITEM_SIZE;
-
-        if (map[row]?.[col] === 1) {
-          break;
-        }
-
-        x += xTileStep;
-        y += yTileStep;
-        j++;
-      }
-    }
-
-    context.strokeStyle = "pink";
-    context.lineWidth = 1;
-    context.beginPath();
-    context.moveTo(raySource.x, raySource.y);
-    context.lineTo(x + xOffset, y);
-    context.stroke();
+    drawRays(raySource, x, y, xTileStep, yTileStep, xOffset, yOffset);
   },
 });
 
