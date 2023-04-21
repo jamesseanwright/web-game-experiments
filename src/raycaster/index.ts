@@ -98,7 +98,6 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
       y = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE);
       x = (raySource.y - y) * atan + raySource.x;
       yTileStep = -GRID_ITEM_SIZE;
-      xTileStep = -yTileStep * atan;
       yOffset = GRID_ITEM_SIZE; // This is so the line ends at the bottom of the tile
     }
 
@@ -109,8 +108,9 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
 
       x = (raySource.y - y) * atan + raySource.x;
       yTileStep = GRID_ITEM_SIZE;
-      xTileStep = -yTileStep * atan;
     }
+
+    xTileStep = -yTileStep * atan;
 
     if (!isFacingAlongAxis) {
       let j = 0;
@@ -137,51 +137,51 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
     context.stroke();
 
     // Test vertical lines
-    // const ntan = -Math.tan(rotation);
-    // const isFacingWest = rotation > Math.PI / 2 && rotation < (Math.PI / 2) * 3;
-    // const isFacingEast = rotation < Math.PI / 2 || rotation > (Math.PI / 2) * 3;
+    const ntan = -Math.tan(rotation);
+    const isFacingWest = rotation > Math.PI / 2 && rotation < (Math.PI / 2) * 3;
+    const isFacingEast = rotation < Math.PI / 2 || rotation > (Math.PI / 2) * 3;
 
-    // if (isFacingWest) {
-    //   x = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE);
-    //   y = (raySource.x - x) * ntan + raySource.y;
-    //   xDir = -1;
-    //   xOffset = GRID_ITEM_SIZE;
-    //   yOffset = -xDir * GRID_ITEM_SIZE * ntan;
-    // }
+    if (isFacingWest) {
+      x = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE);
+      y = (raySource.x - x) * ntan + raySource.y;
+      xTileStep = -GRID_ITEM_SIZE;
+      xOffset = GRID_ITEM_SIZE; // This is so the line ends at the right of the tile
+    }
 
-    // if (isFacingEast) {
-    //   x =
-    //     GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE) +
-    //     GRID_ITEM_SIZE;
-    //   y = (raySource.x - x) * ntan + raySource.y;
-    //   xDir = 1;
-    //   xOffset = 0;
-    //   yOffset = -xDir * GRID_ITEM_SIZE * ntan;
-    // }
+    if (isFacingEast) {
+      x =
+        GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE) +
+        GRID_ITEM_SIZE;
 
-    // if (rotation !== 0 && rotation !== Math.PI) {
-    //   let j = 0;
+      y = (raySource.x - x) * ntan + raySource.y;
+      xTileStep = GRID_ITEM_SIZE;
+    }
 
-    //   while (j < 8) {
-    //     const row = Math.floor(y / GRID_ITEM_SIZE);
-    //     const col = x / GRID_ITEM_SIZE;
+    yTileStep = -xTileStep * ntan;
 
-    //     if (map[row]?.[col] === 1) {
-    //       break;
-    //     }
+    if (!isFacingAlongAxis) {
+      let j = 0;
 
-    //     x += GRID_ITEM_SIZE * xDir;
-    //     y += yOffset;
-    //     j++;
-    //   }
-    // }
+      while (j < 8) {
+        const row = Math.floor(y / GRID_ITEM_SIZE);
+        const col = x / GRID_ITEM_SIZE;
 
-    // context.strokeStyle = "pink";
-    // context.lineWidth = 1;
-    // context.beginPath();
-    // context.moveTo(raySource.x, raySource.y);
-    // context.lineTo(x + xOffset, y);
-    // context.stroke();
+        if (map[row]?.[col] === 1) {
+          break;
+        }
+
+        x += xTileStep;
+        y += yTileStep;
+        j++;
+      }
+    }
+
+    context.strokeStyle = "pink";
+    context.lineWidth = 1;
+    context.beginPath();
+    context.moveTo(raySource.x, raySource.y);
+    context.lineTo(x + xOffset, y);
+    context.stroke();
   },
 });
 
