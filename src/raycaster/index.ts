@@ -24,12 +24,10 @@ if (!context) {
   );
 }
 
-interface Entity {
-  update(): void;
-}
-
 interface Rotatable {
   rotation: number;
+  deltaX: number;
+  deltaY: number;
 }
 
 interface Positionable {
@@ -50,29 +48,27 @@ const map = [
   [1, 1, 1, 1, 1, 1, 1, 1],
 ];
 
-const createMapRenderer = () => ({
-  update() {
-    for (let row = 0; row < map.length; row++) {
-      for (let col = 0; col < map[row].length; col++) {
-        context.fillStyle = map[row][col] === 1 ? "white" : "black";
-        context.fillRect(
-          GRID_ITEM_SIZE * col,
-          GRID_ITEM_SIZE * row,
-          GRID_ITEM_SIZE,
-          GRID_ITEM_SIZE,
-        );
+const renderMap = () => {
+  for (let row = 0; row < map.length; row++) {
+    for (let col = 0; col < map[row].length; col++) {
+      context.fillStyle = map[row][col] === 1 ? "white" : "black";
+      context.fillRect(
+        GRID_ITEM_SIZE * col,
+        GRID_ITEM_SIZE * row,
+        GRID_ITEM_SIZE,
+        GRID_ITEM_SIZE,
+      );
 
-        context.strokeStyle = "2px solid blue";
-        context.strokeRect(
-          GRID_ITEM_SIZE * col,
-          GRID_ITEM_SIZE * row,
-          GRID_ITEM_SIZE,
-          GRID_ITEM_SIZE,
-        );
-      }
+      context.strokeStyle = "2px solid blue";
+      context.strokeRect(
+        GRID_ITEM_SIZE * col,
+        GRID_ITEM_SIZE * row,
+        GRID_ITEM_SIZE,
+        GRID_ITEM_SIZE,
+      );
     }
-  },
-});
+  }
+};
 
 const RAY_COUNT = 1;
 
@@ -157,12 +153,10 @@ const testVerticalIntersect = (raySource: Positionable & Rotatable) => {
   drawRays(raySource, x, y, xTileStep, yTileStep, xOffset, 0);
 };
 
-const createRayRenderer = (raySource: Positionable & Rotatable) => ({
-  update() {
-    testHorizontalIntersect(raySource);
-    testVerticalIntersect(raySource);
-  },
-});
+const renderRays = (raySource: Positionable & Rotatable) => {
+  testHorizontalIntersect(raySource);
+  testVerticalIntersect(raySource);
+};
 
 const PLAYER_SIZE = 32;
 const PLAYER_SPEED = 5;
@@ -176,46 +170,50 @@ const createPlayer = (x: number, y: number, rotation: number) => ({
   rotation,
   deltaX: Math.cos(rotation) * 5,
   deltaY: Math.sin(rotation) * 5,
-  update() {
-    if (isKeyPressed("w")) {
-      this.x += this.deltaX;
-      this.y += this.deltaY;
-    }
-
-    if (isKeyPressed("s")) {
-      this.x -= this.deltaX;
-      this.y -= this.deltaY;
-    }
-
-    if (isKeyPressed("a")) {
-      const rotation = this.rotation - PLAYER_ROTATION_SPEED;
-      this.rotation = rotation < 0 ? rotation + Math.PI * 2 : rotation;
-      this.deltaX = Math.cos(this.rotation) * 5;
-      this.deltaY = Math.sin(this.rotation) * 5;
-    }
-
-    if (isKeyPressed("d")) {
-      const rotation = this.rotation + PLAYER_ROTATION_SPEED;
-      this.rotation =
-        rotation > Math.PI * 2 ? rotation - 2 * Math.PI : rotation;
-      this.deltaX = Math.cos(this.rotation) * 5;
-      this.deltaY = Math.sin(this.rotation) * 5;
-    }
-
-    context.fillStyle = "green";
-    context.fillRect(this.x, this.y, PLAYER_SIZE, PLAYER_SIZE);
-
-    context.lineWidth = PLAYER_SIZE / 4;
-    context.strokeStyle = "green";
-    context.beginPath();
-    context.moveTo(this.x + PLAYER_SIZE / 2, this.y + PLAYER_SIZE / 2);
-    context.lineTo(
-      this.x + PLAYER_SIZE / 2 + this.deltaX * 10,
-      this.y + PLAYER_SIZE / 2 + this.deltaY * 10,
-    );
-    context.stroke();
-  },
 });
+
+const updatePlayer = (player: Positionable & Rotatable) => {
+  if (isKeyPressed("w")) {
+    player.x += player.deltaX;
+    player.y += player.deltaY;
+  }
+
+  if (isKeyPressed("s")) {
+    player.x -= player.deltaX;
+    player.y -= player.deltaY;
+  }
+
+  if (isKeyPressed("a")) {
+    const rotation = player.rotation - PLAYER_ROTATION_SPEED;
+    player.rotation = rotation < 0 ? rotation + Math.PI * 2 : rotation;
+    player.deltaX = Math.cos(player.rotation) * 5;
+    player.deltaY = Math.sin(player.rotation) * 5;
+  }
+
+  if (isKeyPressed("d")) {
+    const rotation = player.rotation + PLAYER_ROTATION_SPEED;
+    player.rotation =
+      rotation > Math.PI * 2 ? rotation - 2 * Math.PI : rotation;
+    player.deltaX = Math.cos(player.rotation) * 5;
+    player.deltaY = Math.sin(player.rotation) * 5;
+  }
+};
+
+const renderPlayer = (player: Positionable & Rotatable) => {
+  context.fillStyle = "green";
+  context.fillRect(player.x, player.y, PLAYER_SIZE, PLAYER_SIZE);
+
+  context.lineWidth = PLAYER_SIZE / 4;
+  context.strokeStyle = "green";
+  context.beginPath();
+  context.moveTo(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2);
+  context.lineTo(
+    player.x + PLAYER_SIZE / 2 + player.deltaX * 10,
+    player.y + PLAYER_SIZE / 2 + player.deltaY * 10,
+  );
+
+  context.stroke();
+};
 
 const FPS = 60;
 const TICK_INTERVAL_MS = 1000 / FPS;
@@ -223,19 +221,15 @@ const TICK_INTERVAL_MS = 1000 / FPS;
 let lastTick = 0;
 
 const player = createPlayer(300, 300, 0);
-const entities: Entity[] = [
-  createMapRenderer(),
-  player,
-  createRayRenderer(player),
-];
 
 const loop = (tick: DOMHighResTimeStamp) => {
   if (tick - lastTick >= TICK_INTERVAL_MS) {
     context.clearRect(0, 0, context.canvas.width, context.canvas.height);
 
-    for (const entity of entities) {
-      entity.update();
-    }
+    renderMap();
+    updatePlayer(player);
+    renderPlayer(player);
+    renderRays(player);
 
     lastTick = tick;
   }
