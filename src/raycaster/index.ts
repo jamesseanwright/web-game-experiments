@@ -116,6 +116,7 @@ const createRayRenderer = (raySource: Positionable & Rotatable) => ({
       let j = 0;
 
       while (j < 8) {
+        // TODO: refactor depth of field check (and bump number!)
         const row = y / GRID_ITEM_SIZE;
         const col = Math.floor(x / GRID_ITEM_SIZE);
 
