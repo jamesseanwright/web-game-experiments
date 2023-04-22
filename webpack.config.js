@@ -3,6 +3,7 @@ const path = require("path");
 module.exports = ({ project }) => ({
   mode: "development",
   devtool: "inline-source-map",
+  watch: true,
   entry: `./src/${project}/index.ts`,
   output: {
     filename: "main.js",
