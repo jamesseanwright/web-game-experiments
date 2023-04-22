@@ -62,6 +62,10 @@ const map = [
   [1, 1, 1, 1, 1, 1, 1, 1],
 ];
 
+// i.e. the hypotenuse
+const getDistance = (ax: number, ay: number, bx: number, by: number) =>
+  Math.sqrt((bx - ax) * (bx - ax) + (by - ay) * (by - ay));
+
 const renderMap = () => {
   for (let row = 0; row < map.length; row++) {
     for (let col = 0; col < map[row].length; col++) {
@@ -147,7 +151,14 @@ const testHorizontalIntersect = (rayRotation: number, raySource: RaySource) => {
 
   const xTileStep = -yTileStep * ncotan;
 
-  renderRay(rayRotation, raySource, x, y, xTileStep, yTileStep, raySource.width / 2, yOffset);
+  return [
+    x,
+    y,
+    xTileStep,
+    yTileStep,
+    raySource.width / 2,
+    yOffset,
+  ];
 };
 
 const testVerticalIntersect = (rayRotation: number, raySource: RaySource) => {
@@ -168,7 +179,14 @@ const testVerticalIntersect = (rayRotation: number, raySource: RaySource) => {
 
   const yTileStep = -xTileStep * ntan;
 
-  renderRay(rayRotation, raySource, x, y, xTileStep, yTileStep, xOffset, raySource.height / 2);
+  return [
+    x,
+    y,
+    xTileStep,
+    yTileStep,
+    xOffset,
+    raySource.height / 2,
+  ];
 };
 
 const renderRays = (raySource: RaySource) => {
@@ -176,8 +194,20 @@ const renderRays = (raySource: RaySource) => {
   const raysEndAngle = raySource.rotation + RAY_INCREMENT_RADIANS * RAY_COUNT / 2;
 
   for (let rayRotation = raysStartAngle; rayRotation < raysEndAngle; rayRotation += RAY_INCREMENT_RADIANS) {
-    testHorizontalIntersect(rayRotation, raySource);
-    testVerticalIntersect(rayRotation, raySource);
+    const [hx, hy, hxTileStep, hyTileStep, hxOffset, hyOffset] = testHorizontalIntersect(rayRotation, raySource);
+    const hDistance = getDistance(raySource.x, raySource.y, hx, hy)
+    const [vx, vy, vxTileStep, vyTileStep, vxOffset, vyOffset] = testVerticalIntersect(rayRotation, raySource);
+    const vDistance = getDistance(raySource.x, raySource.y, vx, vy)
+
+    // Select the shortest ray
+    const x = hDistance < vDistance ? hx : vx;
+    const y = hDistance < vDistance ? hy : vy;
+    const xTileStep = hDistance < vDistance ? hxTileStep : vxTileStep;
+    const yTileStep = hDistance < vDistance ? hyTileStep : vyTileStep;
+    const xOffset = hDistance < vDistance ? hxOffset : vxOffset;
+    const yOffset = hDistance < vDistance ? hyOffset : vyOffset;
+
+    renderRay(rayRotation, raySource, x, y, xTileStep, yTileStep, xOffset, yOffset);
   }
 };
 
