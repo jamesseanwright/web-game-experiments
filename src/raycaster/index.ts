@@ -89,7 +89,7 @@ const renderMap = () => {
 // rendering; this enables us to draw multiple rays around
 // the ray source, determined by the values specified
 // in RAY_INCREMENT_RADIANS and RAY_COUNT.
-const drawRays = (
+const renderRay = (
   rayRotation: number,
   raySource: RaySource,
   x: number,
@@ -147,7 +147,7 @@ const testHorizontalIntersect = (rayRotation: number, raySource: RaySource) => {
 
   const xTileStep = -yTileStep * ncotan;
 
-  drawRays(rayRotation, raySource, x, y, xTileStep, yTileStep, raySource.width / 2, yOffset);
+  renderRay(rayRotation, raySource, x, y, xTileStep, yTileStep, raySource.width / 2, yOffset);
 };
 
 const testVerticalIntersect = (rayRotation: number, raySource: RaySource) => {
@@ -168,7 +168,7 @@ const testVerticalIntersect = (rayRotation: number, raySource: RaySource) => {
 
   const yTileStep = -xTileStep * ntan;
 
-  drawRays(rayRotation, raySource, x, y, xTileStep, yTileStep, xOffset, raySource.height / 2);
+  renderRay(rayRotation, raySource, x, y, xTileStep, yTileStep, xOffset, raySource.height / 2);
 };
 
 const renderRays = (raySource: RaySource) => {
