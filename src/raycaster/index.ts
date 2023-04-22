@@ -1,5 +1,6 @@
 const GRID_ITEM_SIZE = 64;
-const RAY_COUNT = 1;
+const RAY_COUNT = 60;
+const RAY_INCREMENT_RADIANS = 0.0174533; // i.e. 1 degree
 const PLAYER_SIZE = 32;
 const PLAYER_SPEED = 5;
 const PLAYER_ROTATION_SPEED = 0.1;
@@ -83,7 +84,13 @@ const renderMap = () => {
   }
 };
 
+// In the following ray-related functions, rayRotation is
+// raySource.rotation but offset for the current ray we're
+// rendering; this enables us to draw multiple rays around
+// the ray source, determined by the values specified
+// in RAY_INCREMENT_RADIANS and RAY_COUNT.
 const drawRays = (
+  rayRotation: number,
   raySource: RaySource,
   x: number,
   y: number,
@@ -93,7 +100,7 @@ const drawRays = (
   yOffset: number,
 ) => {
   const isFacingAlongAxis =
-    raySource.rotation === 0 || raySource.rotation === Math.PI;
+    rayRotation === 0 || rayRotation === Math.PI;
 
   if (isFacingAlongAxis) {
     return;
@@ -123,14 +130,14 @@ const drawRays = (
   context.stroke();
 };
 
-const testHorizontalIntersect = (raySource: RaySource) => {
-  const ncotan = -1 / Math.tan(raySource.rotation);
+const testHorizontalIntersect = (rayRotation: number, raySource: RaySource) => {
+  const ncotan = -1 / Math.tan(rayRotation);
   let y = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE);
   let yOffset = GRID_ITEM_SIZE; // This is so the line ends at the bottom of the tile
   let yTileStep = -GRID_ITEM_SIZE;
   const x = (raySource.y - y) * ncotan + raySource.x;
 
-  const isFacingSouth = raySource.rotation < Math.PI;
+  const isFacingSouth = rayRotation < Math.PI;
 
   if (isFacingSouth) {
     y += GRID_ITEM_SIZE;
@@ -140,18 +147,18 @@ const testHorizontalIntersect = (raySource: RaySource) => {
 
   const xTileStep = -yTileStep * ncotan;
 
-  drawRays(raySource, x, y, xTileStep, yTileStep, raySource.width / 2, yOffset);
+  drawRays(rayRotation, raySource, x, y, xTileStep, yTileStep, raySource.width / 2, yOffset);
 };
 
-const testVerticalIntersect = (raySource: RaySource) => {
-  const ntan = -Math.tan(raySource.rotation);
+const testVerticalIntersect = (rayRotation: number, raySource: RaySource) => {
+  const ntan = -Math.tan(rayRotation);
   let x = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE);
   let xTileStep = -GRID_ITEM_SIZE;
   let xOffset = GRID_ITEM_SIZE; // This is so the line ends at the right of the tile
   const y = (raySource.x - x) * ntan + raySource.y;
 
   const isFacingEast =
-    raySource.rotation < Math.PI / 2 || raySource.rotation > (Math.PI / 2) * 3;
+    rayRotation < Math.PI / 2 || rayRotation > (Math.PI / 2) * 3;
 
   if (isFacingEast) {
     x += GRID_ITEM_SIZE;
@@ -161,12 +168,17 @@ const testVerticalIntersect = (raySource: RaySource) => {
 
   const yTileStep = -xTileStep * ntan;
 
-  drawRays(raySource, x, y, xTileStep, yTileStep, xOffset, raySource.height / 2);
+  drawRays(rayRotation, raySource, x, y, xTileStep, yTileStep, xOffset, raySource.height / 2);
 };
 
 const renderRays = (raySource: RaySource) => {
-  testHorizontalIntersect(raySource);
-  testVerticalIntersect(raySource);
+  const raysStartAngle = raySource.rotation - RAY_INCREMENT_RADIANS * RAY_COUNT / 2;
+  const raysEndAngle = raySource.rotation + RAY_INCREMENT_RADIANS * RAY_COUNT / 2;
+
+  for (let rayRotation = raysStartAngle; rayRotation < raysEndAngle; rayRotation += RAY_INCREMENT_RADIANS) {
+    testHorizontalIntersect(rayRotation, raySource);
+    testVerticalIntersect(rayRotation, raySource);
+  }
 };
 
 const isKeyPressed = createKeys();
