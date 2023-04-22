@@ -43,6 +43,13 @@ interface Positionable {
   y: number;
 }
 
+interface Sizeable {
+  width: number;
+  height: number;
+}
+
+type RaySource = Rotatable & Positionable & Sizeable;
+
 const map = [
   [1, 1, 1, 1, 1, 1, 1, 1],
   [1, 0, 1, 0, 0, 0, 0, 1],
@@ -77,7 +84,7 @@ const renderMap = () => {
 };
 
 const drawRays = (
-  raySource: Rotatable & Positionable,
+  raySource: RaySource,
   x: number,
   y: number,
   xTileStep: number,
@@ -111,12 +118,12 @@ const drawRays = (
   context.strokeStyle = "green";
   context.lineWidth = 1;
   context.beginPath();
-  context.moveTo(raySource.x, raySource.y);
+  context.moveTo(raySource.x + raySource.width / 2, raySource.y + raySource.height / 2);
   context.lineTo(x + xOffset, y + yOffset);
   context.stroke();
 };
 
-const testHorizontalIntersect = (raySource: Positionable & Rotatable) => {
+const testHorizontalIntersect = (raySource: RaySource) => {
   const ncotan = -1 / Math.tan(raySource.rotation);
   let y = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE);
   let yOffset = GRID_ITEM_SIZE; // This is so the line ends at the bottom of the tile
@@ -133,10 +140,10 @@ const testHorizontalIntersect = (raySource: Positionable & Rotatable) => {
 
   const xTileStep = -yTileStep * ncotan;
 
-  drawRays(raySource, x, y, xTileStep, yTileStep, 0, yOffset);
+  drawRays(raySource, x, y, xTileStep, yTileStep, raySource.width / 2, yOffset);
 };
 
-const testVerticalIntersect = (raySource: Positionable & Rotatable) => {
+const testVerticalIntersect = (raySource: RaySource) => {
   const ntan = -Math.tan(raySource.rotation);
   let x = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE);
   let xTileStep = -GRID_ITEM_SIZE;
@@ -154,19 +161,21 @@ const testVerticalIntersect = (raySource: Positionable & Rotatable) => {
 
   const yTileStep = -xTileStep * ntan;
 
-  drawRays(raySource, x, y, xTileStep, yTileStep, xOffset, 0);
+  drawRays(raySource, x, y, xTileStep, yTileStep, xOffset, raySource.height / 2);
 };
 
-const renderRays = (raySource: Positionable & Rotatable) => {
+const renderRays = (raySource: RaySource) => {
   testHorizontalIntersect(raySource);
   testVerticalIntersect(raySource);
 };
 
 const isKeyPressed = createKeys();
 
-const createPlayer = (x: number, y: number, rotation: number) => ({
+const createPlayer = (x: number, y: number, width: number, height: number, rotation: number) => ({
   x,
   y,
+  width,
+  height,
   rotation,
   deltaX: Math.cos(rotation) * 5,
   deltaY: Math.sin(rotation) * 5,
@@ -217,7 +226,7 @@ const renderPlayer = (player: Positionable & Rotatable) => {
 
 let lastTick = 0;
 
-const player = createPlayer(300, 300, 0);
+const player = createPlayer(300, 300, PLAYER_SIZE, PLAYER_SIZE, 0);
 
 const loop = (tick: DOMHighResTimeStamp) => {
   if (tick - lastTick >= TICK_INTERVAL_MS) {
