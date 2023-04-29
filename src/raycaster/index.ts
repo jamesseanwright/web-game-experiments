@@ -88,11 +88,39 @@ const renderMap = () => {
   }
 };
 
+// For debugging
+const renderRayWithinCell = (
+  rayRotation: number,
+  raySource: RaySource,
+  xStep: number,
+  yStep: number,
+) => {
+  const isFacingAlongAxis = rayRotation === 0 || rayRotation === Math.PI;
+
+  if (isFacingAlongAxis) {
+    return;
+  }
+
+  const x = raySource.x + xStep;
+  const y = raySource.y + yStep;
+
+  context.strokeStyle = "green";
+  context.lineWidth = 1;
+  context.beginPath();
+  context.moveTo(
+    raySource.x + raySource.width / 2,
+    raySource.y + raySource.height / 2,
+  );
+  context.lineTo(x, y);
+  context.stroke();
+};
+
 // In the following ray-related functions, rayRotation is
 // raySource.rotation but offset for the current ray we're
 // rendering; this enables us to draw multiple rays around
 // the ray source, determined by the values specified
 // in RAY_INCREMENT_RADIANS and RAY_COUNT.
+
 const renderRay = (
   rayRotation: number,
   raySource: RaySource,
@@ -193,7 +221,8 @@ const renderRays = (raySource: RaySource) => {
     const xStep = hDistance < vDistance ? hxStep : vxStep;
     const yStep = hDistance < vDistance ? hyStep : vyStep;
 
-    renderRay(rayRotation, raySource, xStep, yStep);
+    // TODO: replace with renderRay()
+    renderRayWithinCell(rayRotation, raySource, xStep, yStep);
   }
 };
 
