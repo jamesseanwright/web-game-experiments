@@ -98,8 +98,8 @@ const renderRay = (
   raySource: RaySource,
   x: number,
   y: number,
-  xTileStep: number,
-  yTileStep: number,
+  xStep: number,
+  yStep: number,
   xOffset: number,
   yOffset: number,
 ) => {
@@ -121,8 +121,8 @@ const renderRay = (
       break;
     }
 
-    x += xTileStep;
-    y += yTileStep;
+    x += xStep;
+    y += yStep;
     j++;
   }
 
@@ -138,24 +138,24 @@ const projectHorizontalRay = (rayRotation: number, raySource: RaySource) => {
   const ncotan = -1 / Math.tan(rayRotation);
   let y = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE);
   let yOffset = GRID_ITEM_SIZE; // This is so the line ends at the bottom of the tile
-  let yTileStep = -GRID_ITEM_SIZE;
+  let yStep = -GRID_ITEM_SIZE;
   const x = (raySource.y - y) * ncotan + raySource.x;
 
   const isFacingSouth = rayRotation < Math.PI;
 
   if (isFacingSouth) {
     y += GRID_ITEM_SIZE;
-    yTileStep = GRID_ITEM_SIZE;
+    yStep = GRID_ITEM_SIZE;
     yOffset = 0; // We want the ray line to end at the top of the tile here
   }
 
-  const xTileStep = -yTileStep * ncotan;
+  const xStep = -yStep * ncotan;
 
   return [
     x,
     y,
-    xTileStep,
-    yTileStep,
+    xStep,
+    yStep,
     0,
     yOffset,
   ];
@@ -164,7 +164,7 @@ const projectHorizontalRay = (rayRotation: number, raySource: RaySource) => {
 const projectVerticalRay = (rayRotation: number, raySource: RaySource) => {
   const ntan = -Math.tan(rayRotation);
   let x = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE);
-  let xTileStep = -GRID_ITEM_SIZE;
+  let xStep = -GRID_ITEM_SIZE;
   let xOffset = GRID_ITEM_SIZE; // This is so the line ends at the right of the tile
   const y = (raySource.x - x) * ntan + raySource.y;
 
@@ -173,17 +173,17 @@ const projectVerticalRay = (rayRotation: number, raySource: RaySource) => {
 
   if (isFacingEast) {
     x += GRID_ITEM_SIZE;
-    xTileStep = GRID_ITEM_SIZE;
+    xStep = GRID_ITEM_SIZE;
     xOffset = 0; // We want the line to end at the left of the tile here
   }
 
-  const yTileStep = -xTileStep * ntan;
+  const yStep = -xStep * ntan;
 
   return [
     x,
     y,
-    xTileStep,
-    yTileStep,
+    xStep,
+    yStep,
     xOffset,
     0,
   ];
@@ -194,20 +194,20 @@ const renderRays = (raySource: RaySource) => {
   const raysEndAngle = raySource.rotation + RAY_INCREMENT_RADIANS * RAY_COUNT / 2;
 
   for (let rayRotation = raysStartAngle; rayRotation < raysEndAngle; rayRotation += RAY_INCREMENT_RADIANS) {
-    const [hx, hy, hxTileStep, hyTileStep, hxOffset, hyOffset] = projectHorizontalRay(rayRotation, raySource);
+    const [hx, hy, hxStep, hyStep, hxOffset, hyOffset] = projectHorizontalRay(rayRotation, raySource);
     const hDistance = getDistance(raySource.x, raySource.y, hx, hy)
-    const [vx, vy, vxTileStep, vyTileStep, vxOffset, vyOffset] = projectVerticalRay(rayRotation, raySource);
+    const [vx, vy, vxStep, vyStep, vxOffset, vyOffset] = projectVerticalRay(rayRotation, raySource);
     const vDistance = getDistance(raySource.x, raySource.y, vx, vy)
 
     // Select the shortest ray
     const x = hDistance < vDistance ? hx : vx;
     const y = hDistance < vDistance ? hy : vy;
-    const xTileStep = hDistance < vDistance ? hxTileStep : vxTileStep;
-    const yTileStep = hDistance < vDistance ? hyTileStep : vyTileStep;
+    const xStep = hDistance < vDistance ? hxStep : vxStep;
+    const yStep = hDistance < vDistance ? hyStep : vyStep;
     const xOffset = hDistance < vDistance ? hxOffset : vxOffset;
     const yOffset = hDistance < vDistance ? hyOffset : vyOffset;
 
-    renderRay(rayRotation, raySource, x, y, xTileStep, yTileStep, xOffset, yOffset);
+    renderRay(rayRotation, raySource, x, y, xStep, yStep, xOffset, yOffset);
   }
 };
 
