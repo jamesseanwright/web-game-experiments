@@ -163,21 +163,25 @@ const renderRay = (
 };
 
 const intersectHorizontally = (rayRotation: number, raySource: RaySource) => {
-  const row = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE)
+  const row = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE);
   const isFacingNorth = rayRotation > Math.PI;
-  const yStep = isFacingNorth ? -(raySource.y - row) : GRID_ITEM_SIZE - (raySource.y - row);
+  const yStep = isFacingNorth
+    ? -(raySource.y - row)
+    : GRID_ITEM_SIZE - (raySource.y - row);
   const xStep = yStep / Math.tan(rayRotation);
 
   return [xStep, yStep] as const;
 };
 
 const intersectVertically = (rayRotation: number, raySource: RaySource) => {
-  const col = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE)
+  const col = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE);
 
   const isFacingWest =
     rayRotation > Math.PI / 2 && rayRotation < (Math.PI / 2) * 3;
 
-  const xStep = isFacingWest ? -(raySource.x - col) : GRID_ITEM_SIZE - (raySource.x - col);
+  const xStep = isFacingWest
+    ? -(raySource.x - col)
+    : GRID_ITEM_SIZE - (raySource.x - col);
   const yStep = xStep * Math.tan(rayRotation);
 
   return [xStep, yStep] as const;
