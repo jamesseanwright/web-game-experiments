@@ -162,7 +162,7 @@ const renderRay = (
   context.stroke();
 };
 
-const projectHorizontalRay = (rayRotation: number, raySource: RaySource) => {
+const intersectHorizontally = (rayRotation: number, raySource: RaySource) => {
   const row = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE)
   const isFacingNorth = rayRotation > Math.PI;
   const yStep = isFacingNorth ? -(raySource.y - row) : GRID_ITEM_SIZE - (raySource.y - row);
@@ -171,16 +171,13 @@ const projectHorizontalRay = (rayRotation: number, raySource: RaySource) => {
   return [xStep, yStep] as const;
 };
 
-const projectVerticalRay = (rayRotation: number, raySource: RaySource) => {
-  let xStep = -GRID_ITEM_SIZE + raySource.x;
+const intersectVertically = (rayRotation: number, raySource: RaySource) => {
+  const col = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE)
 
-  const isFacingEast =
-    rayRotation < Math.PI / 2 || rayRotation > (Math.PI / 2) * 3;
+  const isFacingWest =
+    rayRotation > Math.PI / 2 && rayRotation < (Math.PI / 2) * 3;
 
-  if (isFacingEast) {
-    xStep = GRID_ITEM_SIZE - raySource.x;
-  }
-
+  const xStep = isFacingWest ? -(raySource.x - col) : GRID_ITEM_SIZE - (raySource.x - col);
   const yStep = xStep * Math.tan(rayRotation);
 
   return [xStep, yStep] as const;
@@ -197,7 +194,7 @@ const renderRays = (raySource: RaySource) => {
     rayRotation < raysEndAngle;
     rayRotation += RAY_INCREMENT_RADIANS
   ) {
-    const [hxStep, hyStep] = projectHorizontalRay(rayRotation, raySource);
+    const [hxStep, hyStep] = intersectHorizontally(rayRotation, raySource);
 
     const hDistance = getDistance(
       raySource.x,
@@ -206,7 +203,7 @@ const renderRays = (raySource: RaySource) => {
       raySource.y + hyStep,
     );
 
-    const [vxStep, vyStep] = projectVerticalRay(rayRotation, raySource);
+    const [vxStep, vyStep] = intersectVertically(rayRotation, raySource);
 
     const vDistance = getDistance(
       raySource.x,
