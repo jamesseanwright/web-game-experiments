@@ -35,7 +35,7 @@ if (!context) {
 
 interface Rotatable {
   rotation: number;
-  deltaX: number;
+  deltaX: number; // TODO: get rid of these properties!
   deltaY: number;
 }
 
@@ -96,12 +96,8 @@ const renderMap = () => {
 const renderRay = (
   rayRotation: number,
   raySource: RaySource,
-  x: number,
-  y: number,
   xStep: number,
   yStep: number,
-  xOffset: number,
-  yOffset: number,
 ) => {
   const isFacingAlongAxis =
     rayRotation === 0 || rayRotation === Math.PI;
@@ -110,6 +106,8 @@ const renderRay = (
     return;
   }
 
+  let x = raySource.x;
+  let y = raySource.y;
   let j = 0;
 
   while (j < 8) {
@@ -130,63 +128,43 @@ const renderRay = (
   context.lineWidth = 1;
   context.beginPath();
   context.moveTo(raySource.x + raySource.width / 2, raySource.y + raySource.height / 2);
-  context.lineTo(x + xOffset, y + yOffset);
+  context.lineTo(x, y);
   context.stroke();
 };
 
 const projectHorizontalRay = (rayRotation: number, raySource: RaySource) => {
-  const ncotan = -1 / Math.tan(rayRotation);
-  let y = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE);
-  let yOffset = GRID_ITEM_SIZE; // This is so the line ends at the bottom of the tile
-  let yStep = -GRID_ITEM_SIZE;
-  const x = (raySource.y - y) * ncotan + raySource.x;
+  let yStep = -GRID_ITEM_SIZE + raySource.y;
 
   const isFacingSouth = rayRotation < Math.PI;
 
   if (isFacingSouth) {
-    y += GRID_ITEM_SIZE;
-    yStep = GRID_ITEM_SIZE;
-    yOffset = 0; // We want the ray line to end at the top of the tile here
+    yStep = GRID_ITEM_SIZE - raySource.y;
   }
 
-  const xStep = -yStep * ncotan;
+  const xStep = yStep / Math.tan(rayRotation);
 
   return [
-    x,
-    y,
     xStep,
     yStep,
-    0,
-    yOffset,
-  ];
+  ] as const;
 };
 
 const projectVerticalRay = (rayRotation: number, raySource: RaySource) => {
-  const ntan = -Math.tan(rayRotation);
-  let x = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE);
-  let xStep = -GRID_ITEM_SIZE;
-  let xOffset = GRID_ITEM_SIZE; // This is so the line ends at the right of the tile
-  const y = (raySource.x - x) * ntan + raySource.y;
+  let xStep = -GRID_ITEM_SIZE + raySource.x;
 
   const isFacingEast =
     rayRotation < Math.PI / 2 || rayRotation > (Math.PI / 2) * 3;
 
   if (isFacingEast) {
-    x += GRID_ITEM_SIZE;
-    xStep = GRID_ITEM_SIZE;
-    xOffset = 0; // We want the line to end at the left of the tile here
+    xStep = GRID_ITEM_SIZE - raySource.x;
   }
 
-  const yStep = -xStep * ntan;
+  const yStep = xStep * Math.tan(rayRotation);
 
   return [
-    x,
-    y,
     xStep,
     yStep,
-    xOffset,
-    0,
-  ];
+  ] as const;
 };
 
 const renderRays = (raySource: RaySource) => {
@@ -194,20 +172,16 @@ const renderRays = (raySource: RaySource) => {
   const raysEndAngle = raySource.rotation + RAY_INCREMENT_RADIANS * RAY_COUNT / 2;
 
   for (let rayRotation = raysStartAngle; rayRotation < raysEndAngle; rayRotation += RAY_INCREMENT_RADIANS) {
-    const [hx, hy, hxStep, hyStep, hxOffset, hyOffset] = projectHorizontalRay(rayRotation, raySource);
-    const hDistance = getDistance(raySource.x, raySource.y, hx, hy)
-    const [vx, vy, vxStep, vyStep, vxOffset, vyOffset] = projectVerticalRay(rayRotation, raySource);
-    const vDistance = getDistance(raySource.x, raySource.y, vx, vy)
+    const [hxStep, hyStep] = projectHorizontalRay(rayRotation, raySource);
+    const hDistance = getDistance(raySource.x, raySource.y, raySource.x + hxStep, raySource.y + hyStep)
+    const [vxStep, vyStep] = projectVerticalRay(rayRotation, raySource);
+    const vDistance = getDistance(raySource.x, raySource.y, raySource.x + vxStep, raySource.y + vyStep)
 
     // Select the shortest ray
-    const x = hDistance < vDistance ? hx : vx;
-    const y = hDistance < vDistance ? hy : vy;
     const xStep = hDistance < vDistance ? hxStep : vxStep;
     const yStep = hDistance < vDistance ? hyStep : vyStep;
-    const xOffset = hDistance < vDistance ? hxOffset : vxOffset;
-    const yOffset = hDistance < vDistance ? hyOffset : vyOffset;
 
-    renderRay(rayRotation, raySource, x, y, xStep, yStep, xOffset, yOffset);
+    renderRay(rayRotation, raySource, xStep, yStep);
   }
 };
 
