@@ -156,7 +156,7 @@ const testHorizontalIntersect = (rayRotation: number, raySource: RaySource) => {
     y,
     xTileStep,
     yTileStep,
-    raySource.width / 2,
+    0,
     yOffset,
   ];
 };
@@ -185,7 +185,7 @@ const testVerticalIntersect = (rayRotation: number, raySource: RaySource) => {
     xTileStep,
     yTileStep,
     xOffset,
-    raySource.height / 2,
+    0,
   ];
 };
 
