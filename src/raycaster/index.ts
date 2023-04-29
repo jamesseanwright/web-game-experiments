@@ -134,7 +134,7 @@ const renderRay = (
   context.stroke();
 };
 
-const testHorizontalIntersect = (rayRotation: number, raySource: RaySource) => {
+const projectHorizontalRay = (rayRotation: number, raySource: RaySource) => {
   const ncotan = -1 / Math.tan(rayRotation);
   let y = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE);
   let yOffset = GRID_ITEM_SIZE; // This is so the line ends at the bottom of the tile
@@ -161,7 +161,7 @@ const testHorizontalIntersect = (rayRotation: number, raySource: RaySource) => {
   ];
 };
 
-const testVerticalIntersect = (rayRotation: number, raySource: RaySource) => {
+const projectVerticalRay = (rayRotation: number, raySource: RaySource) => {
   const ntan = -Math.tan(rayRotation);
   let x = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE);
   let xTileStep = -GRID_ITEM_SIZE;
@@ -194,9 +194,9 @@ const renderRays = (raySource: RaySource) => {
   const raysEndAngle = raySource.rotation + RAY_INCREMENT_RADIANS * RAY_COUNT / 2;
 
   for (let rayRotation = raysStartAngle; rayRotation < raysEndAngle; rayRotation += RAY_INCREMENT_RADIANS) {
-    const [hx, hy, hxTileStep, hyTileStep, hxOffset, hyOffset] = testHorizontalIntersect(rayRotation, raySource);
+    const [hx, hy, hxTileStep, hyTileStep, hxOffset, hyOffset] = projectHorizontalRay(rayRotation, raySource);
     const hDistance = getDistance(raySource.x, raySource.y, hx, hy)
-    const [vx, vy, vxTileStep, vyTileStep, vxOffset, vyOffset] = testVerticalIntersect(rayRotation, raySource);
+    const [vx, vy, vxTileStep, vyTileStep, vxOffset, vyOffset] = projectVerticalRay(rayRotation, raySource);
     const vDistance = getDistance(raySource.x, raySource.y, vx, vy)
 
     // Select the shortest ray
