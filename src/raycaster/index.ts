@@ -1,5 +1,5 @@
 const GRID_ITEM_SIZE = 64;
-const RAY_COUNT = 60;
+const RAY_COUNT = 1;
 const RAY_INCREMENT_RADIANS = 0.0174533; // i.e. 1 degree
 const PLAYER_SIZE = 32;
 const PLAYER_SPEED = 5;
@@ -268,7 +268,7 @@ const renderPlayer = (player: Positionable & Rotatable) => {
 
 let lastTick = 0;
 
-const player = createPlayer(300, 300, PLAYER_SIZE, PLAYER_SIZE, 0);
+const player = createPlayer(272, 144, PLAYER_SIZE, PLAYER_SIZE, 0);
 
 const loop = (tick: DOMHighResTimeStamp) => {
   if (tick - lastTick >= TICK_INTERVAL_MS) {
