@@ -164,14 +164,8 @@ const renderRay = (
 
 const projectHorizontalRay = (rayRotation: number, raySource: RaySource) => {
   const row = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE)
-  let yStep = -GRID_ITEM_SIZE + (row - raySource.y);
-
-  const isFacingSouth = rayRotation < Math.PI;
-
-  if (isFacingSouth) {
-    yStep = GRID_ITEM_SIZE - (raySource.y - row);
-  }
-
+  const isFacingNorth = rayRotation > Math.PI;
+  const yStep = isFacingNorth ? -(raySource.y - row) : GRID_ITEM_SIZE - (raySource.y - row);
   const xStep = yStep / Math.tan(rayRotation);
 
   return [xStep, yStep] as const;
