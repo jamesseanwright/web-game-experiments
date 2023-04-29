@@ -11,11 +11,11 @@ const createKeys = () => {
   const keys = new Set<string>();
 
   window.addEventListener("keydown", ({ key }) => {
-    keys.add(key);
+    keys.add(key.toLowerCase());
   });
 
   window.addEventListener("keyup", ({ key }) => {
-    keys.delete(key);
+    keys.delete(key.toLowerCase());
   });
 
   const isPressed = (key: string) => keys.has(key);
@@ -163,12 +163,13 @@ const renderRay = (
 };
 
 const projectHorizontalRay = (rayRotation: number, raySource: RaySource) => {
-  let yStep = -GRID_ITEM_SIZE + raySource.y;
+  const row = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE)
+  let yStep = -GRID_ITEM_SIZE + (row - raySource.y);
 
   const isFacingSouth = rayRotation < Math.PI;
 
   if (isFacingSouth) {
-    yStep = GRID_ITEM_SIZE - raySource.y;
+    yStep = GRID_ITEM_SIZE - (raySource.y - row);
   }
 
   const xStep = yStep / Math.tan(rayRotation);
@@ -203,13 +204,16 @@ const renderRays = (raySource: RaySource) => {
     rayRotation += RAY_INCREMENT_RADIANS
   ) {
     const [hxStep, hyStep] = projectHorizontalRay(rayRotation, raySource);
+
     const hDistance = getDistance(
       raySource.x,
       raySource.y,
       raySource.x + hxStep,
       raySource.y + hyStep,
     );
+
     const [vxStep, vyStep] = projectVerticalRay(rayRotation, raySource);
+
     const vDistance = getDistance(
       raySource.x,
       raySource.y,
