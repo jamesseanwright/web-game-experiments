@@ -99,8 +99,7 @@ const renderRay = (
   xStep: number,
   yStep: number,
 ) => {
-  const isFacingAlongAxis =
-    rayRotation === 0 || rayRotation === Math.PI;
+  const isFacingAlongAxis = rayRotation === 0 || rayRotation === Math.PI;
 
   if (isFacingAlongAxis) {
     return;
@@ -127,7 +126,10 @@ const renderRay = (
   context.strokeStyle = "green";
   context.lineWidth = 1;
   context.beginPath();
-  context.moveTo(raySource.x + raySource.width / 2, raySource.y + raySource.height / 2);
+  context.moveTo(
+    raySource.x + raySource.width / 2,
+    raySource.y + raySource.height / 2,
+  );
   context.lineTo(x, y);
   context.stroke();
 };
@@ -143,10 +145,7 @@ const projectHorizontalRay = (rayRotation: number, raySource: RaySource) => {
 
   const xStep = yStep / Math.tan(rayRotation);
 
-  return [
-    xStep,
-    yStep,
-  ] as const;
+  return [xStep, yStep] as const;
 };
 
 const projectVerticalRay = (rayRotation: number, raySource: RaySource) => {
@@ -161,21 +160,34 @@ const projectVerticalRay = (rayRotation: number, raySource: RaySource) => {
 
   const yStep = xStep * Math.tan(rayRotation);
 
-  return [
-    xStep,
-    yStep,
-  ] as const;
+  return [xStep, yStep] as const;
 };
 
 const renderRays = (raySource: RaySource) => {
-  const raysStartAngle = raySource.rotation - RAY_INCREMENT_RADIANS * RAY_COUNT / 2;
-  const raysEndAngle = raySource.rotation + RAY_INCREMENT_RADIANS * RAY_COUNT / 2;
+  const raysStartAngle =
+    raySource.rotation - (RAY_INCREMENT_RADIANS * RAY_COUNT) / 2;
+  const raysEndAngle =
+    raySource.rotation + (RAY_INCREMENT_RADIANS * RAY_COUNT) / 2;
 
-  for (let rayRotation = raysStartAngle; rayRotation < raysEndAngle; rayRotation += RAY_INCREMENT_RADIANS) {
+  for (
+    let rayRotation = raysStartAngle;
+    rayRotation < raysEndAngle;
+    rayRotation += RAY_INCREMENT_RADIANS
+  ) {
     const [hxStep, hyStep] = projectHorizontalRay(rayRotation, raySource);
-    const hDistance = getDistance(raySource.x, raySource.y, raySource.x + hxStep, raySource.y + hyStep)
+    const hDistance = getDistance(
+      raySource.x,
+      raySource.y,
+      raySource.x + hxStep,
+      raySource.y + hyStep,
+    );
     const [vxStep, vyStep] = projectVerticalRay(rayRotation, raySource);
-    const vDistance = getDistance(raySource.x, raySource.y, raySource.x + vxStep, raySource.y + vyStep)
+    const vDistance = getDistance(
+      raySource.x,
+      raySource.y,
+      raySource.x + vxStep,
+      raySource.y + vyStep,
+    );
 
     // Select the shortest ray
     const xStep = hDistance < vDistance ? hxStep : vxStep;
@@ -187,7 +199,13 @@ const renderRays = (raySource: RaySource) => {
 
 const isKeyPressed = createKeys();
 
-const createPlayer = (x: number, y: number, width: number, height: number, rotation: number) => ({
+const createPlayer = (
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  rotation: number,
+) => ({
   x,
   y,
   width,
