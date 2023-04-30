@@ -25,8 +25,8 @@ const processFrames = () => {
         throw err;
       }
 
-      const updatedFrame = fs.readFileSync(path.join(outdir, "11.bmp"));
-      // processFrame(updatedFrame);
+      const crushedFrame = fs.readFileSync(path.join(outdir, "11.bmp"));
+      processFrame(crushedFrame);
     });
   }
 };
