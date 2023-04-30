@@ -64,7 +64,7 @@ const map = [
 
 // i.e. the hypotenuse
 const getDistance = (ax: number, ay: number, bx: number, by: number) =>
-  Math.sqrt((bx - ax) * (bx - ax) + (by - ay) * (by - ay));
+  Math.sqrt((bx - ax) ** 2 + (by - ay) ** 2);
 
 const renderMap = () => {
   for (let row = 0; row < map.length; row++) {
@@ -116,16 +116,15 @@ const renderRayWithinCell = (
 };
 
 const projectRay = (
-  raySource: RaySource,
-  xIntersect: number,
-  yIntersect: number,
+  x: number,
+  y: number,
   xStep: number,
   yStep: number,
+  direction: number,
+  rotation: number,
+  renderGridIntersections = false,
 ) => {
-  let x = raySource.x + xIntersect; // TODO: offset from centre
-  let y = raySource.y + yIntersect;
-  const isFacingAlongAxis =
-    raySource.rotation === 0 || raySource.rotation === Math.PI;
+  const isFacingAlongAxis = rotation === 0 || rotation === Math.PI;
 
   if (isFacingAlongAxis) {
     return [x, y] as const;
@@ -134,16 +133,25 @@ const projectRay = (
   let j = 0;
 
   while (j < 8) {
+    if (renderGridIntersections) {
+      context.beginPath();
+      context.fillStyle = "red";
+      context.ellipse(x, y, 10, 10, 0, 0, Math.PI * 2);
+      context.fill();
+    }
+
     // TODO: refactor depth of field check (and bump number!)
     const row = Math.floor(y / GRID_ITEM_SIZE);
     const col = Math.floor(x / GRID_ITEM_SIZE);
+    const hasHitWall =
+      map[row + Math.min(direction, 0)]?.[col + Math.min(direction, 0)] === 1;
 
-    if (map[row]?.[col] === 1) {
+    if (hasHitWall) {
       return [x, y] as const;
     }
 
-    x += xStep;
-    y += yStep;
+    x += xStep * direction;
+    y += yStep * direction;
     j++;
   }
 
@@ -168,10 +176,10 @@ const intersectHorizontally = (rayRotation: number, raySource: RaySource) => {
   const direction = rayRotation > Math.PI ? -1 : 1;
   const yIntersect = direction === -1 ? yDelta : GRID_ITEM_SIZE + yDelta;
   const xIntersect = yIntersect / Math.tan(rayRotation);
-  const yStep = direction * GRID_ITEM_SIZE; // TODO: handle in grid space and project to pixels at render time
-  const xStep = (direction * GRID_ITEM_SIZE) / Math.tan(rayRotation);
+  const yStep = GRID_ITEM_SIZE; // TODO: handle in grid space and project to pixels at render time
+  const xStep = GRID_ITEM_SIZE / Math.tan(rayRotation);
 
-  return [xIntersect, yIntersect, xStep, yStep] as const;
+  return [xIntersect, yIntersect, xStep, yStep, direction] as const;
 };
 
 const intersectVertically = (rayRotation: number, raySource: RaySource) => {
@@ -183,10 +191,10 @@ const intersectVertically = (rayRotation: number, raySource: RaySource) => {
 
   const xIntersect = direction === -1 ? xDelta : GRID_ITEM_SIZE + xDelta;
   const yIntersect = xIntersect * Math.tan(rayRotation);
-  const xStep = direction * GRID_ITEM_SIZE;
-  const yStep = direction * GRID_ITEM_SIZE * Math.tan(rayRotation);
+  const xStep = GRID_ITEM_SIZE;
+  const yStep = GRID_ITEM_SIZE * Math.tan(rayRotation);
 
-  return [xIntersect, yIntersect, xStep, yStep] as const;
+  return [xIntersect, yIntersect, xStep, yStep, direction] as const;
 };
 
 const renderRays = (raySource: RaySource) => {
@@ -201,30 +209,36 @@ const renderRays = (raySource: RaySource) => {
     rayRotation < raysEndAngle;
     rayRotation += RAY_INCREMENT_RADIANS
   ) {
-    const [hxIntersect, hyIntersect, hxStep, hyStep] = intersectHorizontally(
-      rayRotation,
-      raySource,
-    );
+    const [hxIntersect, hyIntersect, hxStep, hyStep, hDirection] =
+      intersectHorizontally(rayRotation, raySource);
+
     const [hx, hy] = projectRay(
-      raySource,
-      hxIntersect,
-      hyIntersect,
+      raySource.x + hxIntersect,
+      raySource.y + hyIntersect,
       hxStep,
       hyStep,
+      hDirection,
+      raySource.rotation, // TODO: replace with rayRotation
     );
 
-    const hDistance = getDistance(raySource.x, raySource.y, hx, hy);
-
-    const [vxIntersect, vyIntersect, vxStep, vyStep] = intersectVertically(
-      rayRotation,
-      raySource,
+    const hDistance = getDistance(
+      raySource.x + hxIntersect,
+      raySource.y + hyIntersect,
+      hx,
+      hy,
     );
+
+    const [vxIntersect, vyIntersect, vxStep, vyStep, vDirection] =
+      intersectVertically(rayRotation, raySource);
+
     const [vx, vy] = projectRay(
-      raySource,
-      vxIntersect,
-      vyIntersect,
+      raySource.x + vxIntersect,
+      raySource.y + vyIntersect,
       vxStep,
       vyStep,
+      vDirection,
+      raySource.rotation, // TODO: replace with rayRotation
+      true,
     );
 
     const vDistance = getDistance(raySource.x, raySource.y, vx, vy);
@@ -233,7 +247,8 @@ const renderRays = (raySource: RaySource) => {
     const x = hDistance < vDistance ? hx : vx;
     const y = hDistance < vDistance ? hy : vy;
 
-    renderRay(raySource, x, y);
+    // renderRay(raySource, hx, hy);
+    renderRay(raySource, vx, vy);
   }
 };
 
