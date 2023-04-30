@@ -183,7 +183,7 @@ const intersectVertically = (rayRotation: number, raySource: RaySource) => {
 
   const xIntersect = direction === -1 ? xDelta : GRID_ITEM_SIZE + xDelta;
   const yIntersect = xIntersect * Math.tan(rayRotation);
-  const xStep = GRID_ITEM_SIZE;
+  const xStep = direction * GRID_ITEM_SIZE;
   const yStep = direction * GRID_ITEM_SIZE * Math.tan(rayRotation);
 
   return [xIntersect, yIntersect, xStep, yStep] as const;
