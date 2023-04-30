@@ -166,9 +166,7 @@ const intersectHorizontally = (rayRotation: number, raySource: RaySource) => {
   const row = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE);
   const yDelta = row - raySource.y;
   const direction = rayRotation > Math.PI ? -1 : 1;
-
   const yIntersect = direction === -1 ? yDelta : GRID_ITEM_SIZE + yDelta;
-
   const xIntersect = yIntersect / Math.tan(rayRotation);
   const yStep = direction * GRID_ITEM_SIZE; // TODO: handle in grid space and project to pixels at render time
   const xStep = (direction * GRID_ITEM_SIZE) / Math.tan(rayRotation);
@@ -184,7 +182,6 @@ const intersectVertically = (rayRotation: number, raySource: RaySource) => {
     rayRotation > Math.PI / 2 && rayRotation < (Math.PI / 2) * 3 ? -1 : 1;
 
   const xIntersect = direction === -1 ? xDelta : GRID_ITEM_SIZE + xDelta;
-
   const yIntersect = xIntersect * Math.tan(rayRotation);
   const xStep = GRID_ITEM_SIZE;
   const yStep = direction * GRID_ITEM_SIZE * Math.tan(rayRotation);
@@ -195,6 +192,7 @@ const intersectVertically = (rayRotation: number, raySource: RaySource) => {
 const renderRays = (raySource: RaySource) => {
   const raysStartAngle =
     raySource.rotation - (RAY_INCREMENT_RADIANS * RAY_COUNT) / 2;
+
   const raysEndAngle =
     raySource.rotation + (RAY_INCREMENT_RADIANS * RAY_COUNT) / 2;
 
