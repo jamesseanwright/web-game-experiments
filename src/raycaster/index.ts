@@ -121,11 +121,14 @@ const renderRayWithinCell = (
 // the ray source, determined by the values specified
 // in RAY_INCREMENT_RADIANS and RAY_COUNT.
 
+// TODO: decouple into respective ray projection/collision and render functions
 const renderRay = (
   rayRotation: number,
   raySource: RaySource,
   xStep: number,
   yStep: number,
+  xIntersect: number,
+  yIntersect: number,
 ) => {
   const isFacingAlongAxis = rayRotation === 0 || rayRotation === Math.PI;
 
@@ -133,8 +136,8 @@ const renderRay = (
     return;
   }
 
-  let x = raySource.x;
-  let y = raySource.y;
+  let x = raySource.x + xIntersect;
+  let y = raySource.y + yIntersect;
   let j = 0;
 
   while (j < 8) {
@@ -207,30 +210,31 @@ const renderRays = (raySource: RaySource) => {
     rayRotation < raysEndAngle;
     rayRotation += RAY_INCREMENT_RADIANS
   ) {
-    const [hxStep, hyStep] = intersectHorizontally(rayRotation, raySource);
+    const [hxIntersect, hyIntersect, hxStep, hyStep] = intersectHorizontally(rayRotation, raySource);
 
-    const hDistance = getDistance(
-      raySource.x,
-      raySource.y,
-      raySource.x + hxStep,
-      raySource.y + hyStep,
-    );
+    // const hDistance = getDistance(
+    //   raySource.x,
+    //   raySource.y,
+    //   raySource.x + hxStep,
+    //   raySource.y + hyStep,
+    // );
 
-    const [vxStep, vyStep] = intersectVertically(rayRotation, raySource);
+    const [vxIntersect, vyIntersect, vxStep, vyStep] = intersectVertically(rayRotation, raySource);
 
-    const vDistance = getDistance(
-      raySource.x,
-      raySource.y,
-      raySource.x + vxStep,
-      raySource.y + vyStep,
-    );
+    // const vDistance = getDistance(
+    //   raySource.x,
+    //   raySource.y,
+    //   raySource.x + vxStep,
+    //   raySource.y + vyStep,
+    // );
 
-    // Select the shortest ray
-    const xStep = hDistance < vDistance ? hxStep : vxStep;
-    const yStep = hDistance < vDistance ? hyStep : vyStep;
+    // // Select the shortest ray
+    // const xStep = hDistance < vDistance ? hxStep : vxStep;
+    // const yStep = hDistance < vDistance ? hyStep : vyStep;
 
-    // TODO: replace with renderRay()
-    renderRayWithinCell(rayRotation, raySource, xStep, yStep);
+    renderRay(raySource.rotation, raySource, hxIntersect, hyIntersect, hxStep, hyStep)
+
+    // renderRayWithinCell(rayRotation, raySource, xStep, yStep);
   }
 };
 
