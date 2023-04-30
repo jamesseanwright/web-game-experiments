@@ -164,27 +164,36 @@ const renderRay = (
 
 const intersectHorizontally = (rayRotation: number, raySource: RaySource) => {
   const row = GRID_ITEM_SIZE * Math.floor(raySource.y / GRID_ITEM_SIZE);
-  const isFacingNorth = rayRotation > Math.PI;
-  const yStep = isFacingNorth
-    ? -(raySource.y - row)
-    : GRID_ITEM_SIZE - (raySource.y - row);
-  const xStep = yStep / Math.tan(rayRotation);
+  const yDelta = row - raySource.y;
+  const direction = rayRotation > Math.PI ? -1 : 1;
 
-  return [xStep, yStep] as const;
+  const yIntersect = direction === -1
+    ? yDelta
+    : GRID_ITEM_SIZE + yDelta;
+
+  const xIntersect = yIntersect / Math.tan(rayRotation);
+  const yStep = direction * GRID_ITEM_SIZE; // TODO: handle in grid space and project to pixels at render time
+  const xStep = (direction * GRID_ITEM_SIZE) / Math.tan(rayRotation);
+
+  return [xIntersect, yIntersect, xStep, yStep] as const;
 };
 
 const intersectVertically = (rayRotation: number, raySource: RaySource) => {
   const col = GRID_ITEM_SIZE * Math.floor(raySource.x / GRID_ITEM_SIZE);
+  const xDelta = col - raySource.x;
 
-  const isFacingWest =
-    rayRotation > Math.PI / 2 && rayRotation < (Math.PI / 2) * 3;
+  const direction =
+    rayRotation > Math.PI / 2 && rayRotation < (Math.PI / 2) * 3 ? -1: 1;
 
-  const xStep = isFacingWest
-    ? -(raySource.x - col)
-    : GRID_ITEM_SIZE - (raySource.x - col);
-  const yStep = xStep * Math.tan(rayRotation);
+  const xIntersect = direction === -1
+    ? xDelta
+    : GRID_ITEM_SIZE + xDelta;
 
-  return [xStep, yStep] as const;
+  const yIntersect = xIntersect * Math.tan(rayRotation);
+  const xStep = GRID_ITEM_SIZE;
+  const yStep = (direction * GRID_ITEM_SIZE) * Math.tan(rayRotation);
+
+  return [xIntersect, yIntersect, xStep, yStep] as const;
 };
 
 const renderRays = (raySource: RaySource) => {
