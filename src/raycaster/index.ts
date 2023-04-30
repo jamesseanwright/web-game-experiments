@@ -125,10 +125,10 @@ const renderRayWithinCell = (
 const renderRay = (
   rayRotation: number,
   raySource: RaySource,
-  xStep: number,
-  yStep: number,
   xIntersect: number,
   yIntersect: number,
+  xStep: number,
+  yStep: number,
 ) => {
   const isFacingAlongAxis = rayRotation === 0 || rayRotation === Math.PI;
 
@@ -136,7 +136,7 @@ const renderRay = (
     return;
   }
 
-  let x = raySource.x + xIntersect;
+  let x = raySource.x + xIntersect; // TODO: offset from centre
   let y = raySource.y + yIntersect;
   let j = 0;
 
@@ -158,8 +158,8 @@ const renderRay = (
   context.lineWidth = 1;
   context.beginPath();
   context.moveTo(
-    raySource.x + raySource.width / 2,
-    raySource.y + raySource.height / 2,
+    raySource.x, // TODO: offset from centre
+    raySource.y,
   );
   context.lineTo(x, y);
   context.stroke();
